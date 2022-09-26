@@ -65,7 +65,8 @@ router.put('/:id', async (req, res) => {
     await updatedProduct.update(updateData);
     const productTags = await ProductTag.findAll({ where: { product_id: req.params.id } });
     const productTagIds = productTags.map(({ tag_id }) => tag_id);
-    const newProductTags = req.body.tagIds
+    if(req.body.tagIds) {
+      const newProductTags = req.body.tagIds
       .filter((tag_id) => !productTagIds.includes(tag_id))
       .map((tag_id) => {
         return {
@@ -78,11 +79,12 @@ router.put('/:id', async (req, res) => {
       .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id))
       .map(({ id }) => id);
     // run both actions
-    await Promise.all([
+    const updatedProductTags = await Promise.all([
       ProductTag.destroy({ where: { id: productTagsToRemove } }),
       ProductTag.bulkCreate(newProductTags),
     ]);
-    res.json(updatedProductTags)
+    res.status(200).json({ product: updatedProduct, productTags: updatedProductTags})
+  } else res.status(200).json(updatedProduct);
   } catch (err) {
     handleError(req, res, err);
   }
