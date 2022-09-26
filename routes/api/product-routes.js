@@ -22,8 +22,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     // find a single product whose id matches the one in req.params.id, including category/tag data
-    const productData = await Product.findOne(
-      { 
+    const productData = await Product.findOne({ 
         where: { id: req.params.id },
         include: [{ model: Category }, { model: Tag }]
       });
@@ -109,8 +108,21 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
-  // delete one product by its `id` value
+router.delete('/:id', async (req, res) => {
+  // delete one product by its `id` value, send the deleted product back on success
+  try {
+    // find the product to delete, we do this instead of just Product.destroy so we can send back the deleted product data
+    const deletedProduct = await Product.findOne({
+      where: { id: req.params.id }
+    });
+    // delete the product and send back a successful status with the deleted product data
+    deletedProduct.destroy();
+    res.status(200).json(deletedProduct);
+  } catch (err) {
+    // if there's an error, log it on our side and send the status code to the client
+    console.log(err);
+    res.sendStatus(500);
+  }
 });
 
 module.exports = router;

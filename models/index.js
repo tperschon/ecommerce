@@ -8,7 +8,7 @@ const ProductTag = require('./ProductTag');
 Product.belongsTo(Category, {
   foreignKey: 'category_id'
 });
-// Categories have many Products
+// Categories have many Products, if a category is deleted the coresponding entry in a product will be set to null
 Category.hasMany(Product, {
   foreignKey: 'category_id',
   onDelete: 'SET NULL'
