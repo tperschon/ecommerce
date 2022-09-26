@@ -19,9 +19,20 @@ router.get('/', async (req, res) => {
 });
 
 // get one product
-router.get('/:id', (req, res) => {
-  // find a single product by its `id`
-  // be sure to include its associated Category and Tag data
+router.get('/:id', async (req, res) => {
+  try {
+    // find a single product whose id matches the one in req.params.id, including category/tag data
+    const productData = await Product.findOne(
+      { 
+        where: { id: req.params.id },
+        include: [{ model: Category }, { model: Tag }]
+      });
+    res.status(200).json(productData);
+  } catch (err) {
+    // if there's an error, log it on our side and send the status code to the client
+    console.log(err);
+    res.sendStatus(500);
+  }
 });
 
 // create new product
